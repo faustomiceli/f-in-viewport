@@ -1,5 +1,5 @@
 (async () => {
-  window.isinviewport = new VisInViewport()
+  window.isinviewport = new FInViewport()
   await window.isinviewport.init()
 
   window.isinviewport.add('.other', {

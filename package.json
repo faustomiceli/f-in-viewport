@@ -1,8 +1,8 @@
 {
-  "name": "visinviewport",
+  "name": "f-in-viewport",
   "version": "1.0.0",
   "description": "",
-  "main": "dist/vinviewport.js",
+  "main": "dist/finviewport.js",
   "scripts": {
     "build": "webpack --mode=production",
     "watch": "webpack --mode=development -w",

@@ -4,52 +4,18 @@
  *
  * @author MiceliF
  */
-class VisInViewport {
+class FInViewport {
 	constructor(opt = {}) {
 		this.elements = []
 		this.opt = opt
 	}
 
 	async init() {
-		return this.loadPolyfill.then(() => {
+		return this.loadPolyfill().then(() => {
 			this.observer = new IntersectionObserver(entries => {
-				entries.forEach(entry => {
-					let data = {}
-					let elObj = entry.target
-					let elOpt = this._getElementOption(elObj)
-					let percentage = this._roundPercentage(entry.intersectionRatio * 100)
-
-					data.movingAction = elObj.inViewPercentage > percentage ? 'hiding' : 'showing'
-					data.percentage = percentage
-					data.boundingClientRect = entry.boundingClientRect
-
-					elObj.inViewPercentage = percentage
-
-					if (percentage == 100 && !elObj.isFullInView) {
-						if (!elObj.isInView) {
-							this._callCb(elOpt.onEnter, elObj, data)
-							elObj.isInView = true
-						}
-
-						this._callCb(elOpt.onFullEnter, elObj, data)
-						elObj.isFullInView = true
-					} else if (percentage > 0) {
-						this._callCb(elOpt.isMoving, elObj, data)
-
-						if (!elObj.isInView) {
-							this._callCb(elOpt.onEnter, elObj, data)
-							elObj.isInView = true
-						}
-
-						elObj.isFullInView = false
-					} else {
-						this._callCb(elOpt.onExit, elObj, data)
-						elObj.isInView = false
-						elObj.isFullInView = false
-					}
-				})
+				entries.forEach(entry => this.singleObserver(entry))
 			}, {
-				threshold: this.opt.threshold || this._getThreshold(),
+				threshold: this._getThreshold(this.opt.thresholdLength),
 			})
 		})
 	}
@@ -64,25 +30,58 @@ class VisInViewport {
 
 		return Promise.resolve()
 	}
+	
+	singleObserver(entry) {
+		let data = {}
+		let elObj = entry.target
+		let elOpt = this._getElementOption(elObj)
+		let percentage = this._roundPercentage(entry.intersectionRatio * 100)
+
+		data.movingAction = elObj.inViewPercentage > percentage ? 'hiding' : 'showing'
+		data.percentage = percentage
+		data.boundingClientRect = entry.boundingClientRect
+
+		elObj.inViewPercentage = percentage
+
+		if (percentage == 100 && !elObj.isFullInView) {
+			if (!elObj.isInView) {
+				this._callCb(elOpt.onEnter, elObj, data)
+				elObj.isInView = true
+			}
+
+			this._callCb(elOpt.onFullEnter, elObj, data)
+			elObj.isFullInView = true
+		} else if (percentage > 0) {
+			this._callCb(elOpt.isMoving, elObj, data)
+
+			if (!elObj.isInView) {
+				this._callCb(elOpt.onEnter, elObj, data)
+				elObj.isInView = true
+			}
+
+			elObj.isFullInView = false
+		} else {
+			this._callCb(elOpt.onExit, elObj, data)
+			elObj.isInView = false
+			elObj.isFullInView = false
+		}
+	}
 
 	/**
 	 * Add element to observer
-	 * @param {HtmlElement|String} el
-	 * @param {Object} opt
-	 * @param {Function} opt.onEnter
-	 * @param {Function} opt.onFullEnter
-	 * @param {Function} opt.onExit
-	 * @param {Function} opt.isMoving
+	 * @param {htmlElement|string} el
+	 * @param {object} opt
+	 * @param {function} opt.onEnter
+	 * @param {function} opt.onFullEnter
+	 * @param {function} opt.onExit
+	 * @param {function} opt.isMoving
 	 */
 	add(el, opt = {}) {
 		el = typeof el == 'string' ? document.querySelector(el) : el
 
 		if (this.observer && el) {
 			this.observer.observe(el)
-			this.elements.push({
-				el: el,
-				opt: opt,
-			})
+			this.elements.push({ el, opt })
 		}
 	}
 
@@ -103,6 +102,10 @@ class VisInViewport {
 		return this.elements.find(item => item.el == elObj).opt
 	}
 
+	/**
+	 * @param {number} percentage
+	 * @returns {number}
+	 */
 	_roundPercentage(percentage) {
 		if (percentage > 100) {
 			percentage = 100
@@ -113,10 +116,13 @@ class VisInViewport {
 		}
 		return percentage
 	}
-
-	_getThreshold() {
-		return new Array(101).fill(0).map((zero, index) => {
-			return index * 0.01
+	
+	/**
+	 * @param {number} [thresholdLength=101]
+	 */
+	_getThreshold(thresholdLength = 101) {
+		return new Array(thresholdLength).fill().map((zero, index) => {
+			return index / thresholdLength;
 		})
 	}
 
@@ -126,3 +132,6 @@ class VisInViewport {
 		}
 	}
 }
+window.FInViewport = FInViewport
+
+export default FInViewport
