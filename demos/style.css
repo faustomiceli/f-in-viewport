@@ -1,0 +1,9 @@
+body {
+  margin: 100px 0;
+}
+
+.other {
+  background: red;
+  width: 100%;
+  height: 150vh;
+}
