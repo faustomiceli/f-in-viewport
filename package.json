@@ -20,6 +20,6 @@
     "eslint-config-google": "^0.13.0",
     "google-closure-compiler": "^20190709.0.0",
     "webpack": "^4.38.0",
-    "webpack-cli": "^3.3.6"
+    "webpack-cli": "^3.3.12"
   }
 }
